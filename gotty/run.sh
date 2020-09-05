@@ -1,2 +1,2 @@
 #!/usr/bin/env sh
-docker run -it --entrypoint ash $1
+docker run --network="host" -it --entrypoint zsh $1

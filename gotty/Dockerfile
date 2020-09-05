@@ -21,4 +21,5 @@ RUN git clone http://github.com/mbbill/undotree ~/.vim/bundle/undotree
 RUN git clone http://github.com/terminaldweller/fedora && cd fedora/baseline && cp ./.vimrc ~/.vimrc
 RUN go get github.com/yudai/gotty
 RUN vim -T xterm +Helptags +qall
+
 EXPOSE 9000
