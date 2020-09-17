@@ -37,6 +37,9 @@ RUN (cd ~/.oh-my-zsh/plugins; git clone https://github.com/zsh-users/zsh-syntax-
 
 RUN vim -T xterm +Helptags +qall
 
+RUN apk add openssh w3m torsocks
+RUN ln -s /usr/bin/python3 /bin/python
+# RUN service tor start
 EXPOSE 9000
 ENV TERM=st-256
 # RUN st
