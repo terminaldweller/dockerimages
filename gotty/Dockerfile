@@ -40,7 +40,9 @@ RUN vim -T xterm +Helptags +qall
 RUN apk add openssh w3m torsocks mksh
 RUN ln -s /usr/bin/python3 /bin/python
 RUN ln -s /bin/mksh /bin/ksh
+RUN mkdir ~/.w3m
+RUN (cd fedora/.w3m && cp * ~/.w3m)
 # RUN service tor start
 EXPOSE 9000
-ENV TERM=st-256
+# ENV TERM=st-256
 # RUN st
