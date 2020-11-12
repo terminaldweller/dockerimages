@@ -44,5 +44,4 @@ RUN mkdir ~/.w3m
 RUN (cd fedora/.w3m && cp * ~/.w3m)
 # RUN service tor start
 EXPOSE 9000
-# ENV TERM=st-256
-# RUN st
+EXPOSE 8080
