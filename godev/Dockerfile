@@ -3,11 +3,13 @@ RUN apk update && apk upgrade
 RUN apk add tmux st vim ripgrep fzf curl wget git ctags zsh python3 lynx go make cmake gcc lua gdb
 RUN apk add build-base openssh w3m torsocks mksh ruby tor fontconfig python3-dev py3-pip ruby-rdoc
 RUN apk add nodejs-lts npm openjdk11 libzmq llvm perl libc6-compat clang util-linux ncurses-terminfo
+RUN apk add clang-dev mandoc man-pages less less-doc
 RUN apk add --virtual build-deps
 # get docker scripts
-RUN git clone https://github.com/terminaldweller/dockerscripts && cd dockerscripts && chmod +x vimplugins.sh && ./vimplugins.sh
+RUN (cd /root && git clone https://github.com/terminaldweller/dockerscripts && cd dockerscripts && chmod +x vimplugins.sh && ./vimplugins.sh)
+RUN (cd /root/dockerscripts  && cp .wakatime.cfg /root)
 #install ycm
-RUN (cd  ~/.vim/bundle/YouCompleteMe && python3 ./install.py --all)
+RUN (cd  ~/.vim/bundle/YouCompleteMe && python3 ./install.py --all --system-libclang) 
 # install gem
 RUN wget https://rubygems.org/rubygems/rubygems-3.1.4.tgz && tar xvf rubygems-3.1.4.tgz &&  cd rubygems-3.1.4 && ruby setup.rb
 RUN gem install tmuxinator
@@ -65,10 +67,8 @@ RUN apk add libx11-dev libxkbfile-dev
 RUN (cd /root && git clone https://github.com/grwlf/xkb-switch)
 RUN (cd /root/xkb-switch && mkdir build && cd build && cmake ../ &&  make && make install)
 
-# RUN vim -c -E ":GoInstallBinaries" -c "qa!"
-# RUN vim +PluginInstall +qall
-#
-RUN apk add madoc man-pages less less-doc
+RUN vim -c "PluginInstall" -c "qa!"
+RUN vim -c "GoInstallBinaries" -c "qa!"
 
 # project stuff
 RUN go get github.com/go-kit/kit/transport/http
