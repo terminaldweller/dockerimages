@@ -2,30 +2,36 @@ FROM alpine:3.12
 RUN apk update && apk upgrade
 RUN apk add tmux st vim ripgrep fzf curl wget git ctags zsh python3 lynx go make cmake gcc lua gdb
 RUN apk add build-base openssh w3m torsocks mksh ruby tor fontconfig python3-dev py3-pip ruby-rdoc
-RUN apk add nodejs-lts npm openjdk11
+RUN apk add nodejs-lts npm openjdk11 libzmq llvm perl libc6-compat clang util-linux ncurses-terminfo
+RUN apk add --virtual build-deps
+# get docker scripts
+RUN git clone https://github.com/terminaldweller/dockerscripts && cd dockerscripts && chmod +x vimplugins.sh && ./vimplugins.sh
+#install ycm
+RUN (cd  ~/.vim/bundle/YouCompleteMe && python3 ./install.py --all)
 # install gem
 RUN wget https://rubygems.org/rubygems/rubygems-3.1.4.tgz && tar xvf rubygems-3.1.4.tgz &&  cd rubygems-3.1.4 && ruby setup.rb
 RUN gem install tmuxinator
 # pip stuff
 RUN pip3 install ranger-fm
 
-RUN mkdir devi
-WORKDIR /devi
-
+# go stuff
 RUN go get github.com/go-delve/delve/cmd/dlv
-
-# get docker scripts
-RUN git clone https://github.com/terminaldweller/dockerscripts && cd dockerscripts && chmod +x vimplugins.sh && ./vimplugins.sh
-#install ycm
-RUN (cd  ~/.vim/bundle/YouCompleteMe && python3 ./install.py --all)
-
-RUN git clone http://github.com/terminaldweller/fedora
-RUN (cd fedora/baseline && cp ./.vimrc ~/.vimrc)
-RUN (cd fedora/baseline && cp ./.tmux.conf ~/.tmux.conf)
 RUN go get github.com/yudai/gotty
 
+# fonsts
+RUN mkdir /root/.font
+RUN wget -P /root/.font https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/DejaVuSansMono/Bold-Italic/complete/DejaVu%20Sans%20Mono%20Bold%20Oblique%20Nerd%20Font%20Complete%20Mono.ttf
+RUN wget -P /root/.font https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/DejaVuSansMono/Regular/complete/DejaVu%20Sans%20Mono%20Nerd%20Font%20Complete%20Mono.ttf
+RUN wget -P /root/.font https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/DejaVuSansMono/Italic/complete/DejaVu%20Sans%20Mono%20Oblique%20Nerd%20Font%20Complete%20Mono.ttf
+RUN wget -P /root/.font https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/DejaVuSansMono/Bold/complete/DejaVu%20Sans%20Mono%20Bold%20Nerd%20Font%20Complete%20Mono.ttf
+RUN fc-cache -f
+
+RUN (cd /root && git clone http://github.com/terminaldweller/fedora)
+RUN (cd /root/fedora && cp ./.vimrc ~/.vimrc)
+RUN (cd /root/fedora/baseline && cp ./.tmux.conf ~/.tmux.conf)
+
 RUN sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
-RUN (cd fedora/baseline && cp ./.zshrc ~/.zshrc)
+RUN (cd /root/fedora/baseline && cp ./.zshrc ~/.zshrc)
 
 RUN zsh
 ENV SHELL=/bin/zsh
@@ -45,25 +51,26 @@ RUN ln -sf /bin/busybox /bin/sh
 RUN ln -s /usr/bin/python3 /bin/python
 RUN ln -s /bin/mksh /bin/ksh
 RUN mkdir ~/.w3m
-RUN (cd fedora/.w3m && cp -R * ~/.w3m)
+RUN (cd /root/fedora/.w3m && cp -R * ~/.w3m)
 # RUN sudo tor; disown
 EXPOSE 9000
 EXPOSE 8080
-
-# fonsts
-WORKDIR ~/
-RUN mkdir .font && cd .font
-RUN wget https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/DejaVuSansMono/Bold-Italic/complete/DejaVu%20Sans%20Mono%20Bold%20Oblique%20Nerd%20Font%20Complete%20Mono.ttf
-RUN wget https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/DejaVuSansMono/Regular/complete/DejaVu%20Sans%20Mono%20Nerd%20Font%20Complete%20Mono.ttf
-RUN wget https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/DejaVuSansMono/Italic/complete/DejaVu%20Sans%20Mono%20Oblique%20Nerd%20Font%20Complete%20Mono.ttf
-RUN wget https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/DejaVuSansMono/Bold/complete/DejaVu%20Sans%20Mono%20Bold%20Nerd%20Font%20Complete%20Mono.ttf
-RUN fc-cache -f
 
 # RUN apk add util-linux
 # nvm stuff
 # RUN zsh -c nvm install --lts
 
+# libxkb
+RUN apk add libx11-dev libxkbfile-dev
+RUN (cd /root && git clone https://github.com/grwlf/xkb-switch)
+RUN (cd /root/xkb-switch && mkdir build && cd build && cmake ../ &&  make && make install)
+
+# RUN vim -c -E ":GoInstallBinaries" -c "qa!"
+# RUN vim +PluginInstall +qall
+#
+RUN apk add madoc man-pages less less-doc
+
 # project stuff
 RUN go get github.com/go-kit/kit/transport/http
 RUN go get github.com/go-kit/kit/endpoint
-RUN git clone https://github.com/terminaldweller/gocrucible
+RUN (cd /root && git clone https://github.com/terminaldweller/gocrucible)
