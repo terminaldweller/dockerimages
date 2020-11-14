@@ -3,21 +3,19 @@ RUN apk update && apk upgrade
 RUN apk add tmux st vim ripgrep fzf curl wget git ctags zsh python3 lynx go make cmake gcc lua gdb
 RUN apk add build-base openssh w3m torsocks mksh ruby tor fontconfig python3-dev py3-pip ruby-rdoc
 RUN apk add nodejs-lts npm openjdk11 libzmq llvm perl libc6-compat clang util-linux ncurses-terminfo
-RUN apk add clang-dev mandoc man-pages less less-doc
+RUN apk add clang-dev mandoc man-pages less less-doc bash bison irssi
 RUN apk add --virtual build-deps
 # get docker scripts
 RUN (cd /root && git clone https://github.com/terminaldweller/dockerscripts && cd dockerscripts && chmod +x vimplugins.sh && ./vimplugins.sh)
 RUN (cd /root/dockerscripts  && cp .wakatime.cfg /root)
 #install ycm
-RUN (cd  ~/.vim/bundle/YouCompleteMe && python3 ./install.py --all --system-libclang) 
+RUN (cd  ~/.vim/bundle/YouCompleteMe && python3 ./install.py --all --system-libclang)
 # install gem
 RUN wget https://rubygems.org/rubygems/rubygems-3.1.4.tgz && tar xvf rubygems-3.1.4.tgz &&  cd rubygems-3.1.4 && ruby setup.rb
 RUN gem install tmuxinator
 # pip stuff
 RUN pip3 install ranger-fm
-
 # go stuff
-RUN go get github.com/go-delve/delve/cmd/dlv
 RUN go get github.com/yudai/gotty
 
 # fonsts
@@ -71,6 +69,8 @@ RUN vim -c "PluginInstall" -c "qa!"
 RUN vim -c "GoInstallBinaries" -c "qa!"
 
 # project stuff
+RUN gvm install go1.13 && gvm use go1.13 --default
+RUN go get github.com/go-delve/delve/cmd/dlv
 RUN go get github.com/go-kit/kit/transport/http
 RUN go get github.com/go-kit/kit/endpoint
 RUN (cd /root && git clone https://github.com/terminaldweller/gocrucible)
