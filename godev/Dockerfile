@@ -69,8 +69,11 @@ RUN vim -c "PluginInstall" -c "qa!"
 RUN vim -c "GoInstallBinaries" -c "qa!"
 
 # project stuff
-RUN gvm install go1.13 && gvm use go1.13 --default
+# RUN ln -sf /bin/zsh /bin/sh
+# RUN gvm install go1.13 && gvm use go1.13 --default
+# RUN ln -sf /bin/busybox /bin/sh
 RUN go get github.com/go-delve/delve/cmd/dlv
+RUN go get golang.org/x/tools/cmd/godoc
 RUN go get github.com/go-kit/kit/transport/http
 RUN go get github.com/go-kit/kit/endpoint
 RUN (cd /root && git clone https://github.com/terminaldweller/gocrucible)

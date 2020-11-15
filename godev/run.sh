@@ -1,2 +1,2 @@
 #!/usr/bin/env sh
-docker run --network="host" -it --entrypoint zsh $1
+docker run -p 9002:9000 -it --entrypoint zsh $1
