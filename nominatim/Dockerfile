@@ -21,7 +21,9 @@ RUN chmod a+x $USERHOME
 RUN systemctl restart postgresql
 RUN systemctl enable postgresql
 RUN systemctl start postgresql
-RUN (su postgres -c 'cd /root && wget https://download.bbbike.org/osm/bbbike/Tehran/Tehran.osm.pbf')
-RUN su postgres -c '/usr/lib/postgresql/12/bin/pg_ctl start -l logfile -D /root/Tehran.osm.pbf'
+RUN (cd /serv && wget https://download.bbbike.org/osm/bbbike/Tehran/Tehran.osm.pbf)
+RUN (cd /serv && chown postgres:postgres /serv)
+RUN (cd /serv && chown postgres:postgres Tehran.osm.pbf)
+RUN su postgres -c '/usr/lib/postgresql/12/bin/pg_ctl start -l logfile -D /serv/Tehran.osm.pbf'
 # RUN sudo -u postgres createuser -s $USERNAME
 # RUN sudo -u postgres createuser www-data
