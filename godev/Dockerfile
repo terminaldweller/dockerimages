@@ -1,4 +1,4 @@
-FROM alpine:3.12
+FROM docker:dind
 RUN apk update && apk upgrade
 RUN apk add tmux st vim ripgrep fzf curl wget git ctags zsh python3 lynx go make cmake gcc lua gdb
 RUN apk add build-base openssh w3m torsocks mksh ruby tor fontconfig python3-dev py3-pip ruby-rdoc
@@ -55,6 +55,8 @@ RUN (cd /root/fedora/.w3m && cp -R * ~/.w3m)
 # RUN sudo tor; disown
 EXPOSE 9000
 EXPOSE 8080
+ENV EDITOR="vim"
+ENV WWW_HOME="google.com"
 
 # RUN apk add util-linux
 # nvm stuff
