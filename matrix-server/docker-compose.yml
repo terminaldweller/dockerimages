@@ -1,0 +1,106 @@
+version: "3.8"
+services:
+  postgres:
+    image: postgres:13-alpine
+    networks:
+      - dbnet
+    volumes:
+      - db-data:/var/lib/postgresql/13/
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD_FILE=/run/secrets/pg_pass_secret
+      - POSTGRES_USER_FILE=/run/secrets/pg_user_secret
+      - POSTGRES_INITDB_ARGS_FILE=/run/secrets/pg_initdb_args_secret
+      - POSTGRES_DB_FILE=/run/secrets/pg_db_secret
+    secrets:
+      - pg_pass_secret
+      - pg_user_secret
+      - pg_initdb_args_secret
+      - pg_db_secret
+  synapse:
+    image: synapse
+    build:
+      context: ./synapse/
+    networks:
+      - matrixnet
+      - certnet
+      - dbnet
+    volumes:
+      - synapse-data:/data/
+      - cert-data:/etc/letsencrypt/live/
+      - ./synapse/homeserver.yaml:/data/homeserver.yaml:ro
+    depends_on:
+      - postgres
+      - haproxy
+    ports:
+      - "8008:8008"
+      - "8484:8484/tcp"
+      - "8443:443"
+    environment:
+      - SYNAPSE_DATA_DIR=/data/
+      - SYNAPSE_CONFIG_DIR=/data/
+      - SYNAPSE_CONFIG_PATH=/data/homeserver.yaml
+      - TZ=Tehran/Asia
+    healthcheck:
+      test: ["CMD", "curl", "-fSs", "http://localhost:8008/health"]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+  haproxy:
+    image: haproxy:lts-alpine
+    ports:
+      - "9080:80"
+      - "443:443"
+      - "9999:9999"
+    networks:
+      - matrixnet
+      - turnnet
+    volumes:
+      - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+      - cert-data:/usr/local/etc/haproxy/certificates:ro
+    depends_on:
+      - certbot
+    restart: on-failure
+  certbot:
+    image: certbot
+    build:
+      context: ./certbot
+    ports:
+      - "80:80"
+      - "9443:443"
+    networks:
+      - certnet
+    volumes:
+      - cert-data:/etc/certificates
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do . /etc/scripts/renew-certificates.sh ; sleep 12h & wait $${!}; done;'"
+    restart: always
+  coturn:
+    image: coturn/coturn:latest
+    networks:
+      - turnnet
+    volumes:
+      - ./coturn/turnserver.conf:/etc/turnserver.conf:ro
+    ports:
+      - "3478:3478"
+      - "5349:5349"
+    depends_on:
+      - synapse
+networks:
+  matrixnet:
+  certnet:
+  dbnet:
+  turnnet:
+volumes:
+  db-data:
+  synapse-data:
+  cert-data:
+secrets:
+  pg_pass_secret:
+    file: ./postgres/pg_pass_secret
+  pg_user_secret:
+    file: ./postgres/pg_user_secret
+  pg_initdb_args_secret:
+    file: ./postgres/pg_initdb_args_secret
+  pg_db_secret:
+    file: ./postgres/pg_db_secret
