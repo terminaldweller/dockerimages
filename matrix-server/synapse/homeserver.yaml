@@ -26,7 +26,7 @@
 # lowercase and may contain an explicit port.
 # Examples: matrix.org, localhost:8080
 #
-server_name: "my.matrix.host"
+server_name: "terminaldweller.com"
 
 # When running as a daemon, the file to store the pid in
 #
@@ -493,11 +493,11 @@ retention:
 # instance, if using certbot, use `fullchain.pem` as your certificate,
 # not `cert.pem`).
 #
-#tls_certificate_path: "/data/my.matrix.host.tls.crt"
+#tls_certificate_path: "/data/terminaldweller.com.tls.crt"
 
 # PEM-encoded private key for TLS
 #
-#tls_private_key_path: "/data/my.matrix.host.tls.key"
+#tls_private_key_path: "/data/terminaldweller.com.tls.key"
 
 # Whether to verify TLS server certificates for outbound federation requests.
 #
@@ -740,27 +740,22 @@ caches:
 #
 # Example Postgres configuration:
 #
-#database:
-#  name: psycopg2
-#  args:
-#    user: synapse_user
-#    password: secretpassword
-#    database: synapse
-#    host: localhost
-#    cp_min: 5
-#    cp_max: 10
-#
-# For more information on using Synapse with Postgres, see `docs/postgres.md`.
-#
 database:
   name: psycopg2
   args:
     user: synapse_user
-    password: "El3ph@nt#13"
+    password: secretpassword
     database: synapse
-    host: postgres
+    host: localhost
     cp_min: 5
     cp_max: 10
+#
+# For more information on using Synapse with Postgres, see `docs/postgres.md`.
+#
+# database:
+#   name: sqlite3
+#   args:
+#     database: /data/homeserver.db
 
 
 ## Logging ##
@@ -768,7 +763,7 @@ database:
 # A yaml python logging config file as described by
 # https://docs.python.org/3.7/library/logging.config.html#configuration-dictionary-schema
 #
-log_config: "/data/my.matrix.host.log.config"
+log_config: "/data/terminaldweller.com.log.config"
 
 
 ## Ratelimiting ##
@@ -1202,7 +1197,7 @@ account_validity:
 # If set, allows registration of standard or admin accounts by anyone who
 # has the shared secret, even if registration is otherwise disabled.
 #
-registration_shared_secret: "cHg5ab1A2RCx;*;M+Fau_lsU-Jr0^4D:JmsG@hXBQ;oNgDJutq"
+registration_shared_secret: "Uo0eL^6.uuhKXt8mqW~:zZ_c@@W~O&rLup_3h0~cmt6UJ7Quk@"
 
 # Set the number of bcrypt rounds used to generate password hash.
 # Larger numbers increase the work factor needed to generate the hash.
@@ -1418,19 +1413,19 @@ report_stats: true
 # the registration_shared_secret is used, if one is given; otherwise,
 # a secret key is derived from the signing key.
 #
-macaroon_secret_key: "&:tL8Yh=9EAzklDrirjZCdVi@_GIg=zTjvAqCaKdxTrmWmopf2"
+macaroon_secret_key: "G@UOj_NJSsc;YLN:kt.F~#&RrQCbJhHRPdxH5#rcDKq^YqdEPh"
 
 # a secret which is used to calculate HMACs for form values, to stop
 # falsification of values. Must be specified for the User Consent
 # forms to work.
 #
-form_secret: "@va7i=QzhcIaS-~ofSgjJjbqj&0A_9EcYsWW=r7*95pJ6wS9RF"
+form_secret: ":KMnLPWdxmxP0&*o+G9cUL~VDGyk5ObB&,Y~HehSU8rn6N02*,"
 
 ## Signing Keys ##
 
 # Path to the signing key to sign messages with
 #
-signing_key_path: "/data/my.matrix.host.signing.key"
+signing_key_path: "/data/terminaldweller.com.signing.key"
 
 # The keys that the server used to sign messages with but won't use
 # to sign new messages.
@@ -2635,3 +2630,5 @@ redis:
   # Optional password if configured on the Redis instance
   #
   #password: <secret_password>
+
+
