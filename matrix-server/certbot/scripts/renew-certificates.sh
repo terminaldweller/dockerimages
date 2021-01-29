@@ -1,7 +1,8 @@
-#!/bin/bash
+#!/bin/sh
 
+echo "running renew certs..."
 # Certificates exist
-if [ -d /etc/letsencrypt/live/davole.com ]; then
+if [ -d /etc/letsencrypt/live/terminaldweller.com ]; then
   # Check certificates and renew them
   certbot renew --http-01-port=380
 

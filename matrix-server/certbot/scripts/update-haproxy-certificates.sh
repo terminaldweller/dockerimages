@@ -1,10 +1,11 @@
-#!/bin/bash
+#!/bin/sh
 
+echo "running update certs..."
 # Start transaction
-echo -e "set ssl cert /usr/local/etc/haproxy/certificates/davole.com.pem <<\n$(cat /etc/certificates/davole.com.pem)\n" | socat tcp-connect:haproxy:9999 -
+echo -e "set ssl cert /etc/letsencrypt/live/terminaldweller.com/fullchain.pem <<\n$(cat /etc/certificates/terminaldweller.com.pem)\n" | socat tcp-connect:haproxy:9999 -
 
 # Commit transaction
-echo "commit ssl cert /usr/local/etc/haproxy/certificates/davole.com.pem" | socat tcp-connect:haproxy:9999 -
+echo "commit ssl cert /etc/letsencrypt/live/terminaldweller.com/fullchain.pem" | socat tcp-connect:haproxy:9999 -
 
 # Show certification info (not essential)
-echo "show ssl cert /usr/local/etc/haproxy/certificates/davole.com.pem" | socat tcp-connect:haproxy:9999 -
+echo "show ssl cert /etc/letsencrypt/live/terminaldweller.com/fullchain.pem" | socat tcp-connect:haproxy:9999 -
