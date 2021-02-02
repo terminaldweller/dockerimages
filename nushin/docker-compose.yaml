@@ -1,0 +1,20 @@
+version: "3.4"
+services:
+  victim:
+    image: victim
+    build:
+      context: ./victim
+    networks:
+      - hacknet
+    entrypoint: ["tail", "-f", "/dev/null"]
+  spoofer:
+    image: spoofer
+    build:
+      context: ./spoofer
+    networks:
+      - hacknet
+    entrypoint: ["tail", "-f", "/dev/null"]
+networks:
+  hacknet:
+    driver: overlay
+    attachable: true
