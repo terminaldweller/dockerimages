@@ -1,7 +1,17 @@
 version: "3.4"
 services:
+  element:
+    image: vectorim/element-web:v1.7.21-rc.1
+    networks: 
+      - clientnet
+    volumes:
+      - ./element/config.json:/app/config.json
+    depends_on:
+      - haproxy
   postgres:
-    image: postgres:13-alpine
+    image: postgres
+    build:
+      context: ./postgres/
     networks:
       - dbnet
     volumes:
@@ -9,10 +19,14 @@ services:
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_PASSWORD_FILE=/run/secrets/pg_pass_secret
-      - POSTGRES_USER_FILE=/run/secrets/pg_user_secret
-      - POSTGRES_INITDB_ARGS_FILE=/run/secrets/pg_initdb_args_secret
-      - POSTGRES_DB_FILE=/run/secrets/pg_db_secret
+      # - POSTGRES_PASSWORD_FILE=/run/secrets/pg_pass_secret
+      # - POSTGRES_USER_FILE=/run/secrets/pg_user_secret
+      # - POSTGRES_INITDB_ARGS_FILE=/run/secrets/pg_initdb_args_secret
+      # - POSTGRES_DB_FILE=/run/secrets/pg_db_secret
+      - POSTGRES_PASSWORD=El3ph@nt#13
+      - POSTGRES_USER=postgres
+      - POSTGRES_INITDB_ARGS=--encoding='UTF-8' --lc-collate='C' --lc-ctype='C'
+      - POSTGRES_DB=synapse
     secrets:
       - pg_pass_secret
       - pg_user_secret
@@ -24,14 +38,9 @@ services:
       context: ./synapse/
     networks:
       - matrixnet
-      - certnet
       - dbnet
     volumes:
       - synapse-data:/data/
-      # - cert-data:/etc/letsencrypt/live/
-      # - ./synapse/homeserver.yaml:/data/homeserver.yaml
-      # - ./synapse/terminaldweller.com.signing.key:/data/terminaldweller.com.signing.key
-      # - ./synapse/terminaldweller.com.log.config:/data/terminaldweller.com.log.config
     # entrypoint: ["tail", "-f", "/dev/null"]
     # command: ["generate"]
     depends_on:
@@ -47,6 +56,8 @@ services:
       - SYNAPSE_DATA_DIR=/data/
       - SYNAPSE_CONFIG_DIR=/data/
       - SYNAPSE_CONFIG_PATH=/data/homeserver.yaml
+      # - SYNAPSE_CONFIG_DIR=/data/
+      # - SYNAPSE_CONFIG_PATH=/data/homeserver.yaml
       # - TZ=Tehran/Asia
     healthcheck:
       test: ["CMD", "curl", "-fSs", "http://localhost:8008/health"]
@@ -54,7 +65,9 @@ services:
       timeout: 10s
       retries: 3
   haproxy:
-    image: haproxy:lts-alpine
+    image: haproxy
+    build:
+      context: ./haproxy/
     ports:
       - "80:80"
       - "443:443"
@@ -64,14 +77,19 @@ services:
       - matrixnet
       - turnnet
       - certnet
+      - clientnet
     volumes:
       - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
       # - cert-data:/usr/local/etc/haproxy/certificates:ro
       # - cert-data:/etc/certificates:ro
       - certificates:/etc/certificates
-    depends_on:
-      - certbot
+      - ./haproxy/error.html:/srv/error.html
     # restart: on-failure
+    healthcheck:
+      test: ["CMD", "curl", "-fSs", "http://localhost:80/health"]
+      interval: 1m
+      timeout: 10s
+      retries: 3
   certbot:
     image: certbot
     build:
@@ -88,6 +106,8 @@ services:
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do . /etc/scripts/renew-certificates.sh ; sleep 12h & wait $${!}; done;'"
     restart: always
     command: ["certonly"]
+    depends_on:
+      - haproxy
   # coturn:
   #   image: coturn/coturn:latest
   #   networks:
@@ -99,15 +119,22 @@ services:
   #     - "5349:5349"
   #   depends_on:
   #     - synapse
+  #     - haproxy
+  debugger:
+    image: alpine:3.13
+    volumes:
+      - synapse-data:/data/
+    entrypoint: ["tail", "-f", "/dev/null"]
 networks:
   matrixnet:
   certnet:
   dbnet:
   turnnet:
+  clientnet:
 volumes:
   db-data:
   synapse-data:
-  cert-data:
+  # cert-data:
   certificates:
   certbot-data:
 secrets:

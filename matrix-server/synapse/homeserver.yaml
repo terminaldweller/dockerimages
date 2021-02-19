@@ -607,7 +607,7 @@ acme:
     #
     # If not set, defaults to your 'server_name'.
     #
-    domain: matrix.example.com
+    domain: terminaldweller.com
 
     # file to use for the account key. This will be generated if it doesn't
     # exist.
@@ -743,10 +743,10 @@ caches:
 database:
   name: psycopg2
   args:
-    user: synapse_user
-    password: secretpassword
+    user: postgres
+    password: El3ph@nt#13
     database: synapse
-    host: localhost
+    host: postgres
     cp_min: 5
     cp_max: 10
 #
