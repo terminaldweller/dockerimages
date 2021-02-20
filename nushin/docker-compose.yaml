@@ -14,7 +14,21 @@ services:
     networks:
       - hacknet
     entrypoint: ["tail", "-f", "/dev/null"]
+    privileged: true
+  # hids:
+  #   # image: atomicorp/ossec-docker
+  #   build:
+  #     context: ./ossec-docker
+  #   networks:
+  #     - hacknet
+  #   # entrypoint: ["tail", "-f", "/dev/null"]
+  #   # volumes:
+  #   #   - hids-config:/var/ossec/
+  #   volumes:
+  #     - /sys/fs/cgroup:/sys/fs/cgroup:ro
 networks:
   hacknet:
-    driver: overlay
-    attachable: true
+    driver: bridge
+    # attachable: true
+volumes:
+  hids-config:
