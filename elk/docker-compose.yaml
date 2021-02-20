@@ -1,0 +1,121 @@
+version: "3.4"
+services:
+  # notification:
+  #   image: notification
+  #   build:
+  #     context: ./
+  #   networks:
+  #     - notifnet
+  #   restart: on-failure
+  #   ports:
+  #     - "8383:8383"
+  #   depends_on:
+  #     - elasticsearch
+  #     - mongopercona
+  #   volumes:
+  #     - log-data:/logs/
+  #   secrets:
+  #     - sms_api_key
+  #     - sms_secret_key
+  #     - firebase_api_key
+  #     - firebase_admin_sdk_pk
+  #     - firebase_google_services
+  #   environment:
+  #     - FIREBASE_CONFIG="/run/secrets/firebase_google_services.json"
+  #     - GOOGLE_APPLICATION_CREDENTIALS="/run/secrets/firebase_admin_sdk_pk"
+  mongopercona:
+    image: percona/percona-server-mongodb:4.0
+    networks:
+      - notifnet
+    restart: on-failure
+    volumes:
+      - queue-data:/data/db
+      - ./percona/mongod.conf:/etc/mongod.conf:ro
+    ports:
+      - "27017:27017"
+      - "27018:27018"
+      - "27019:27019"
+  mongo:
+    image: mongo
+    networks:
+      - notifnet
+    restart: on-failure
+    ports:
+      - "27117:27017"
+      - "27118:27018"
+      - "27119:27019"
+    volumes:
+      - user-data:/data/db
+  elasticsearch:
+    image: elasticsearch:7.10.1
+    volumes:
+      - elk-data:/usr/share/elasticsearch/data
+    networks:
+      - notifnet
+      - lognet
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - ES_JAVA_OPTS=-Xms256m -Xmx256m
+      - discovery.type=single-node
+      - xpack.monitoring.enabled=true
+      - xpack.watcher.enabled=true
+  logstash:
+    image: logstash:7.10.1
+    networks:
+      - lognet
+    depends_on:
+      - elasticsearch
+    environment:
+      - MONITORING_ENABLED=true
+      - LS_JAVA_OPTS=-Xms256m -Xmx256m
+    ports:
+      - "5000:5000"
+  kibana:
+    image: kibana:7.10.1
+    environment:
+      - ELASTICSEARCH_URL=http://elastic:9200
+    networks:
+      - lognet
+    ports:
+      - "5102:5601"
+    depends_on:
+      - elasticsearch
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:7.10.1
+    networks:
+      - lognet
+    depends_on:
+      - elasticsearch
+    environment:
+      - setup.kibana.host=kibana:5601
+      - output.elasticsearch.hosts=["elasticsearch:9200"]
+    volumes:
+      - log-data:/logs/
+      - ./filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml
+volumes:
+  queue-data:
+  elk-data:
+  log-data:
+  user-data:
+networks:
+  lognet:
+    # driver: bridge
+    driver: overlay
+    attachable: true
+  notifnet:
+    # driver: bridge
+    driver: overlay
+    attachable: true
+secrets:
+  sms_api_key:
+    file: ./sms_api_key.txt
+  sms_secret_key:
+    file: ./sms_secret_key.txt
+  firebase_api_key:
+    file: ./firebase_api_key.txt
+  firebase_admin_sdk_pk:
+    file: ./es-provider-firebase-adminsdk-36qrt-609d77a41b.json
+  firebase_google_services:
+    file: ./google-services.json
