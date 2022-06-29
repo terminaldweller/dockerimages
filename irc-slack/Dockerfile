@@ -15,4 +15,3 @@ RUN openssl req -nodes -new -x509 -subj="/C=US/ST=Denial/L=springfield/O=Dis/CN=
 FROM alpine:3.13
 COPY --from=certbuilder /certs /certs
 COPY --from=builder /irc-slack/cmd/irc-slack/irc-slack /irc-slack/
-# /irc-slack/irc-slack --port 6667 --host 0.0.0.0 --cert ../../certs/server.cert --key ../../certs/server.key
