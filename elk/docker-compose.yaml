@@ -16,6 +16,7 @@ services:
       - lognet
     ports:
       - "127.0.0.1:9200:9200"
+      - "172.17.0.1:9200:9200"
       - "127.0.0.1:9300:9300"
     environment:
       - ES_JAVA_OPTS=-Xms256m -Xmx256m
@@ -44,6 +45,7 @@ services:
     volumes:
       - ./logstash.yml:/usr/share/logstash/config/logstash.yml:ro
       - ./logstash.conf:/usr/share/logstash/pipline/logstash.conf:ro
+  # docker run docker.elastic.co/beats/filebeat:8.10.2 setup -E setup.kibana.host=172.17.0.1:5102 -E output.elasticsearch.hosts=["172.17.0.1:9200"]
   kibana:
     image: kibana:8.10.1
     deploy:
@@ -60,6 +62,7 @@ services:
       - lognet
     ports:
       - "127.0.0.1:5102:5601"
+      - "172.17.0.1:5102:5601"
     depends_on:
       - elasticsearch
     volumes:
@@ -82,14 +85,15 @@ services:
       - lognet
     depends_on:
       - elasticsearch
-    environment:
-      - setup.kibana.host=kibana:5601
-      - output.elasticsearch.hosts=["http://elasticsearch:9200"]
+    # environment:
+    #   - setup.kibana.host=kibana:5601
+    #   - output.elasticsearch.hosts=["http://elasticsearch:9200"]
     volumes:
       - log-data:/logs/
-      - /var/lib/docker/containers:/usr/share/dockerlogs/data:ro
+      - /home/devi/ssd1/docker/containers:/usr/share/dockerlogs/data:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - /var/log:/usr/share/var/log:ro
 volumes:
   elk-data:
   log-data:
